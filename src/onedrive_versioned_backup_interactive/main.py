@@ -1,30 +1,41 @@
 # !/usr/bin/env python3
-"""
-# onedrive_versioned_backup_interactive.py
+"""main.py
+#
+#   OneDrive Versioned Backup Interactive - main script
+# =======================================================
+# This script helps you back up your OneDrive to a local disk. It is copy-only
+# (does not delete or modify files in OneDrive). It prunes only old dated
+# folders it created under your backup root.
 #
 # PURPOSE
+#--------
 #   - Mirror your OneDrive into a new, dated folder on a local disk each run.
 #   - Keep only the last N days of backups (prune old dated folders).
 #   - Optionally register a Windows Scheduled Task to run automatically.
 #   - Provide interactive prompts with clear defaults so beginners can run it.
 #
 # SAFE TO READ NOTES
+#-------------------
 #   - This script only *copies* data out of OneDrive into a backup root.
 #   - It never modifies your OneDrive files.
 #   - It prunes only dated backup folders it created under your backup root.
 #
 # REQUIREMENTS
-#   - Windows 10/11 with 'robocopy' and 'schtasks' available (built into Windows).
+#--------------
+#   - Windows 10/11 with 'robocopy' and 'schtasks' available (built into
+# Windows).
 #   - Run from a normal Command Prompt or PowerShell. Admin may be needed to
 #     register a task at "highest" privileges.
 #
 # BACKUP LAYOUT EXAMPLE
+#----------------------
 #   D:\OneDriveBackup\
 #     2025-10-31_09-00\
 #     2025-11-01_09-00\
 #     ...
 #
 # RETURN CODES
+#-------------
 #   - 0  success
 #   - >0 error (including robocopy exit codes >= 8)
 """

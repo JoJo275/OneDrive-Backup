@@ -14,6 +14,7 @@ This project provides a Python script that automates the backup of specified loc
     Add additional documentation after implementing the changes below.
 
 if backup is missed due to PC powered off
+
 - change code to automatically backup when pc is powered on (make this an option the user can choose when running program)
 
 Additionally

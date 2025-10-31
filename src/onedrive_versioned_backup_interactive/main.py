@@ -63,12 +63,12 @@
 #-----------------------
 #   The script registers itself to run in headless mode with the Windows Task Scheduler.
 #   The task will execute with the following characteristics:
-#   - Runs at highest privilege level (if admin rights available)
-#   - Can run whether user is logged on or not
-#   - Automatically overwrites existing task with same name
-#   - Supports DAILY, HOURLY, and MINUTE schedules
+#    - Runs at highest privilege level (if admin rights available)
+#    - Can run whether user is logged on or not
+#    - Automatically overwrites existing task with same name
+#    - Supports DAILY, HOURLY, and MINUTE schedules
 #
-# AUTHOR: 
+# AUTHOR:
 # VERSION: 1.0.0
 # LAST MODIFIED: 2025-01-01
 """
@@ -85,9 +85,10 @@ import datetime as dt
 from pathlib import Path
 from typing import Tuple, List
 
-# -----------------------------
-# DEFAULTS SHOWN TO THE USER
-# -----------------------------
+
+# =============================
+# CONFIGURATION DEFAULTS
+# =============================
 # These defaults are carefully chosen for typical use cases.
 # Users can override them during interactive prompts.
 
@@ -103,9 +104,11 @@ DEFAULT_MODIFIER = 1                           # HOURLY: every 1 hour; MINUTE: e
 # This pattern ensures we only touch folders we created, not user data
 STAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$")
 
-# -----------------------------
+
+# =============================
 # UTILITIES: INPUT + VALIDATION
-# -----------------------------
+# =============================
+
 def prompt_with_default(prompt_text: str, default_value: str) -> str:
     """
     Display an interactive prompt with a default value shown in brackets.
@@ -443,9 +446,11 @@ def prompt_schedule() -> Tuple[str, str, int]:
 
     return sched, start_time, modifier
 
-# -----------------------------
+
+# =============================
 # PATHS AND ROBUSTNESS HELPERS
-# -----------------------------
+# =============================
+
 def onedrive_path() -> Path:
     """
     Intelligently resolve the OneDrive root directory path.
@@ -520,9 +525,11 @@ def timestamp_stamp() -> str:
     # Format: YYYY-MM-DD_HH-MM (e.g., 2025-01-15_09-30)
     return dt.datetime.now().strftime("%Y-%m-%d_%H-%M")
 
-# -----------------------------
+
+# =============================
 # CORE BACKUP AND PRUNING
-# -----------------------------
+# =============================
+
 def run_robocopy(src: Path, dst: Path) -> int:
     """
     Execute robocopy to mirror OneDrive to a backup folder.
@@ -755,17 +762,21 @@ def run_once(backup_root: Path, retention_days: int) -> int:
     # Backup failed - return the robocopy error code
     return rc
 
-# -----------------------------
+
+# =============================
 # SCHEDULED TASK MANAGEMENT
-# -----------------------------
-def build_schtasks_command(task_name: str,
-                           schedule_type: str,
-                           start_time_hhmm: str,
-                           modifier: int,
-                           python_exe: str,
-                           script_path: Path,
-                           backup_root: Path,
-                           retention_days: int) -> List[str]:
+# =============================
+
+def build_schtasks_command(
+    task_name: str,
+    schedule_type: str,
+    start_time_hhmm: str,
+    modifier: int,
+    python_exe: str,
+    script_path: Path,
+    backup_root: Path,
+    retention_days: int
+) -> List[str]:
     """
     Construct the Windows schtasks command to create a scheduled task.
     
@@ -849,12 +860,14 @@ def build_schtasks_command(task_name: str,
 
     return cmd
 
-def install_task(task_name: str,
-                 schedule_type: str,
-                 start_time_hhmm: str,
-                 modifier: int,
-                 backup_root: Path,
-                 retention_days: int) -> int:
+def install_task(
+    task_name: str,
+    schedule_type: str,
+    start_time_hhmm: str,
+    modifier: int,
+    backup_root: Path,
+    retention_days: int
+) -> int:
     """
     Register or update a Windows Scheduled Task for automatic backups.
     
@@ -988,9 +1001,11 @@ def stop_task(task_name: str) -> None:
         # Task doesn't exist or we lack permissions
         print("No task found to stop or delete.", file=sys.stderr)
 
-# -----------------------------
+
+# =============================
 # MAIN INTERACTIVE FLOW
-# -----------------------------
+# =============================
+
 def interactive_main() -> int:
     """
     Main interactive entry point for the script.
@@ -1115,9 +1130,11 @@ def interactive_main() -> int:
     print("\nDone.")
     return 0
 
-# -----------------------------
+
+# =============================
 # HEADLESS ENTRY FOR SCHEDULED TASK
-# -----------------------------
+# =============================
+
 def headless_run(backup_root: Path, retention_days: int) -> int:
     """
     Execute backup in headless (non-interactive) mode.
@@ -1159,9 +1176,11 @@ def headless_run(backup_root: Path, retention_days: int) -> int:
     # Simply run one backup cycle with the provided parameters
     return run_once(backup_root, retention_days)
 
-# -----------------------------
-# ARG PARSE LITE
-# -----------------------------
+
+# =============================
+# COMMAND-LINE ARGUMENT PARSING
+# =============================
+
 def parse_args(argv: List[str]) -> dict:
     """
     Lightweight command-line argument parser.
@@ -1228,12 +1247,12 @@ def parse_args(argv: List[str]) -> dict:
         if tok == "--headless-run":
             args["mode"] = "headless"
             i += 1
-            
+
         # Check for backup root with value
         elif tok == "--backup-root" and i + 1 < len(argv):
             args["backup_root"] = argv[i + 1]
             i += 2
-            
+
         # Check for retention days with value
         elif tok == "--retention-days" and i + 1 < len(argv):
             try:
@@ -1243,51 +1262,53 @@ def parse_args(argv: List[str]) -> dict:
                 # Invalid integer - warn and use default
                 print("Invalid --retention-days. Using default.", file=sys.stderr)
             i += 2
-            
+
         else:
             # Unknown argument - skip it
             # Interactive mode will ignore it safely
             i += 1
-    
+
     return args
 
-# -----------------------------
-# PROGRAM ENTRY
-# -----------------------------
+
+# =============================
+# PROGRAM ENTRY POINT
+# =============================
+
 if __name__ == "__main__":
     """
     Script entry point - determines mode and executes accordingly.
-    
+
     This block runs when the script is executed directly (not imported).
     It parses command-line arguments and routes to either interactive or
     headless mode.
-    
+
     Exit Codes:
         0: Success
         1: General error (e.g., OneDrive not found)
         8+: Robocopy error (serious backup failure)
-    
+
     Execution Modes:
         1. Interactive (default):
            - No arguments or unrecognized arguments
            - User prompts for all settings
            - Friendly wizard-style interface
-        
+
         2. Headless (automated):
            - Triggered by --headless-run flag
            - No user interaction
            - Used by Task Scheduler
-    
+
     Example Usage:
         Interactive:
             python main.py
-        
+
         Headless:
             python main.py --headless-run --backup-root "D:\\Backup" --retention-days 30
     """
     # Parse command-line arguments
     parsed = parse_args(sys.argv[1:])
-    
+
     # Route to appropriate mode based on parsed arguments
     if parsed["mode"] == "headless":
         # Headless mode - called by Task Scheduler or automation
